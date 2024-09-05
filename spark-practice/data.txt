@@ -1,0 +1,3 @@
+john john 19 male ny bachelor
+amy amy 23 female ny master
+bob bob 16 male ca highSchool

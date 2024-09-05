@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: COMS6998 Spring 2022 HW2 - Lambda Functions' CI/CD pipeline (also triggers creation of the whole infra)
+
+Parameters:
+  InfraStackName:
+    Type: String
+    Default: hw2-demo-infra
+
+  LambdaBucketName:
+    Type: String
+    Default: hw2-demo-lambda-cicd-storage
+
+  GitHubUser:
+    Type: String
+    Default: howieraem2
+
+  GitHubToken:
+    Type: String
+    Default: 
+  
+  GitHubRepoInfra:
+    Type: String
+    Default: 6998-hw2-demo
+
+  GitHubBranch:
+    Type: String
+    Default: master
+
+Resources:
+  LambdaBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: CloudFormationRole
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Ref LambdaBucketName
+
+  LambdaCodeBuildRole:
+    Type: AWS::IAM::Role
+    DependsOn: CloudFormationRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Policies:
+        - PolicyName: ServiceRole
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CloudWatchWriteLogsPolicy
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+              - Sid: S3GetObjectPolicy
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: '*'
+              - Sid: S3PutObjectPolicy
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: '*'
+
+  LambdaCodePipelineRole:
+    Type: AWS::IAM::Role
+    DependsOn: CloudFormationRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  LambdaBuildProject:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CloudFormationRole
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        Type: LINUX_CONTAINER
+      Name: !Sub ${AWS::StackName}-build-lambda
+      ServiceRole: !GetAtt LambdaCodeBuildRole.Arn
+      Source:
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 5 # must be between 5 minutes and 8 hours
+
+  LambdaPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Ref LambdaBucket
+      Name: !Sub '${AWS::StackName}'
+      RestartExecutionOnUpdate: true
+      RoleArn: !GetAtt LambdaCodePipelineRole.Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              Configuration:
+                Owner: !Ref GitHubUser
+                Repo: !Ref GitHubRepoInfra
+                Branch: !Ref GitHubBranch
+                OAuthToken: !Ref GitHubToken
+                PollForSourceChanges: true
+              OutputArtifacts:
+                - Name: SourceOutput
+        - Name: PipelineDeploy
+          Actions:
+            - Name: CreateUpdatePipeline
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: !Ref AWS::StackName
+                TemplatePath: SourceOutput::cf_lambda_pipeline.yml
+              InputArtifacts:
+                - Name: SourceOutput
+        - Name: Build
+          Actions:
+            - Name: BuildLambdaFunctions
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref LambdaBuildProject
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+        - Name: InfraDeploy
+          Actions:
+            - Name: CreateUpdateInfra
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: !Ref InfraStackName
+                TemplatePath: SourceOutput::cf_infra.yml
+                ParameterOverrides: '{"DeploymentPackageKey": {"Fn::GetArtifactAtt": ["BuildOutput", "ObjectKey"]}}'
+              InputArtifacts:
+                - Name: SourceOutput
+                - Name: BuildOutput

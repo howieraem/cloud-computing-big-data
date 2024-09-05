@@ -1,0 +1,7 @@
+a.com b.com
+a.com c.net
+b.com c.net
+c.net d.co
+a.com e.co
+d.co bit.ly
+bit.ly a.com

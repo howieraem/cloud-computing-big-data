@@ -1,0 +1,282 @@
+body {
+  text-align: center;
+  font-family: "Josefin Sans", Helvetica, Arial, sans-serif;
+  color: #3f4850;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin: 16px 0 16px;
+  /* text-transform: capitalize; */
+  color: #051c33;
+}
+
+h1 {
+  font-family: "Lobster", "Josefin Sans", Helvetica, Arial, sans-serif;
+  font-size: 3em;
+  color: #051c33;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  outline: 0;
+}
+
+.page-button {
+  max-width: 460px;
+  display: flex;
+  margin: 0 auto 16px;
+  outline: none;
+  border: 1px solid #d7dbdf;
+  padding: 15px 15px;
+  border-radius: 0.35em 0.35em 0.35em 0.35em;
+  cursor: pointer;
+  background-color: #051c33;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.is-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.search-form {
+  max-width: 460px;
+  display: flex;
+  margin: 0 auto 16px;
+}
+
+.search-form button {
+  outline: none;
+  border: 1px solid #d7dbdf;
+  padding: 0px 15px;
+  border-radius: 0.35em 0.35em 0.35em 0.35em;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.active {
+  background-color: #051c33;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+input {
+  font-size: 1em;
+  width: 100%;
+  background-color: #edeff0;
+  padding: 10px 15px;
+  border: 3px solid #d7dbdf;
+  border-right: none;
+  border-radius: 0.35em 0 0 0.35em;
+  outline: none;
+}
+
+.main-nav li {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.main-nav a {
+  display: block;
+  background: #051c33;
+  border-radius: 3px;
+  padding: 5px;
+  color: #fff;
+}
+
+.main-nav .active,
+.main-nav a:hover {
+  background-color: #051c33;
+}
+
+.preview {
+  width: 960px;
+  height: 540px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.photo-container ul {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  -ms-align-items: flex-start;
+  align-items: flex-start;
+}
+
+.photo-container ul li {
+  width: 440px;
+  height: 330px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.photo-container ul img {
+  width: 100%;
+  transform: scale(1.25);
+  transition: transform 1.25s;
+}
+
+.photo-container li:hover img {
+  transform: scale(1.65);
+}
+
+.photo-container .not-found {
+  width: 100%;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  /* Light grey */
+  border-top: 16px solid #051c33;
+  /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.not-found {
+  padding-top: 5%;
+}
+
+@media only screen and (max-width: 767px) {
+  .photo-container li {
+    margin: auto;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .container {
+    max-width: 960px;
+    margin: auto;
+  }
+
+  .main-nav ul {
+    display: flex;
+    justify-content: center;
+  }
+
+  .main-nav li {
+    margin: 10px;
+    width: 100px;
+  }
+}
+
+.label-form {
+  max-width: 460px;
+  margin: 0 auto 16px;
+}
+
+.ReactTags__tags {
+  position: relative;
+}
+
+.ReactTags__clearAll {
+  cursor: pointer;
+  padding: 10px;
+  margin: 10px;
+  background: #f88d8d;
+  color: #fff;
+  border: none;
+}
+
+/* Styles for the input */
+.ReactTags__tagInput {
+  border-radius: 2px;
+  display: inline-block;
+}
+.ReactTags__tagInput input.ReactTags__tagInputField,
+.ReactTags__tagInput input.ReactTags__tagInputField:focus {
+  height: 31px;
+  margin: 12px 0;
+  font-size: 0.9em;
+  border: 1px solid #eee;
+  min-width: 120px;
+  max-width: 120px;
+  border-radius: 0.35em 0.35em 0.35em 0.35em;
+}
+
+.ReactTags__editInput {
+  border-radius: 1px;
+}
+
+.ReactTags__editTagInput {
+  display: inline-flex;
+}
+
+/* Styles for selected tags */
+.ReactTags__selected span.ReactTags__tag {
+  border: 1px solid #ddd;
+  background: #217fc2;
+  color: white;
+  font-size: 18px;
+  display: inline-block;
+  padding: 5px;
+  margin: 5px 5px;
+  border-radius: 2px;
+}
+.ReactTags__selected a.ReactTags__remove {
+  color: #aaa;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* Styles for suggestions */
+.ReactTags__suggestions {
+  position: absolute;
+}
+.ReactTags__suggestions ul {
+  list-style-type: none;
+  box-shadow: 0.05em 0.01em 0.5em rgba(0, 0, 0, 0.2);
+  background: white;
+  width: 200px;
+}
+.ReactTags__suggestions li {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 10px;
+  margin: 0;
+}
+.ReactTags__suggestions li mark {
+  text-decoration: underline;
+  background: none;
+  font-weight: 600;
+}
+.ReactTags__suggestions ul li.ReactTags__activeSuggestion {
+  background: #b7cfe0;
+  cursor: pointer;
+}
+
+.ReactTags__remove {
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: white;
+}

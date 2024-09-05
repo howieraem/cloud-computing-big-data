@@ -1,0 +1,4 @@
+inflect
+opensearch-py
+requests
+requests-aws4auth

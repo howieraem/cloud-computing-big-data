@@ -1,0 +1,12 @@
+version: 0.1
+
+phases:
+  install:
+    commands:
+      - pip install -r requirements.txt -t lambda
+
+artifacts:
+  base-directory: lambda
+  files:
+    - '**/*'
+  type: zip
